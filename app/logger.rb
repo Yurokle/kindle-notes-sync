@@ -4,19 +4,24 @@ class Logger
   end
 
   def log_session &block
-    timestamp = Time.new
     log = []
+    begin
+      block.call(log)
+    rescue Exception => ex
+      log << `which ruby`
+      log << `ruby -v`
+      log << "Error: #{ex.inspect}"
+      log << 'Backtrace:'
+      log << ex.backtrace.join("\n")
+    end
+
+    # We don't initialize a session if nothing printed
+    return if log == []
+
+    log.unshift "===== #{Time.new} ====="
+    log << "------------------------"
 
     File.open @log_path, 'a' do |file|
-      log << "===== #{timestamp} ====="
-
-      begin
-        block.call(log)
-      rescue => ex
-        log << ex.inspect
-      end
-
-      log << "------------------------"
       file.write log.join("\n")
       file.write "\n\n"
     end

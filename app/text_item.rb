@@ -24,6 +24,10 @@ class TextItem
     parse
   end
 
+  def blank?
+    @content == nil || @content == ''
+  end
+
   def highlight?
     @kind == 'Highlight'
   end
@@ -49,6 +53,8 @@ class TextItem
     @page = @meta.scan(/page (\d+)/) && $1
     @created_at = @meta.scan(/Added on (.*)$/) && $1 && Time.parse("#{$1} UTC")
 
-    @content = @content.strip unless bookmark?
+    @content = @content.strip unless @content.nil?
+  rescue => ex
+    raise %{Error raised #{ex.inspect}, unable to parse "#{@text}"}
   end
 end
